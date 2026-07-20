@@ -1,5 +1,12 @@
 ---
+interface Props {
+  term?: string;
+}
+
+const { term } = Astro.props;
 import { GISCUS_CONFIG } from "@/config";
+
+const mapping = term ? "specific" : GISCUS_CONFIG.mapping;
 ---
 
 <div class="giscus-wrapper">
@@ -9,7 +16,8 @@ import { GISCUS_CONFIG } from "@/config";
     data-repo-id={GISCUS_CONFIG.repoId}
     data-category={GISCUS_CONFIG.category}
     data-category-id={GISCUS_CONFIG.categoryId}
-    data-mapping={GISCUS_CONFIG.mapping}
+    data-mapping={mapping}
+    data-term={term}
     data-strict="0"
     data-reactions-enabled={GISCUS_CONFIG.reactionsEnabled ? "1" : "0"}
     data-emit-metadata={GISCUS_CONFIG.emitMetadata ? "1" : "0"}
