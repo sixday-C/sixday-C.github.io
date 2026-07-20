@@ -27,15 +27,18 @@ const { title, image, headings = [], showTOC = false } = Astro.props;
       (function () {
         const storedTheme = localStorage.getItem("theme");
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const validThemes = [SITE_THEME.light, SITE_THEME.dark];
 
-        // Use stored theme if available, otherwise use system preference
+        // Migrate the previous dark theme and discard themes no longer configured.
         let theme;
-        if (storedTheme) {
+        if (storedTheme === "dracula") {
+          theme = SITE_THEME.dark;
+        } else if (validThemes.includes(storedTheme)) {
           theme = storedTheme;
         } else {
           theme = prefersDark ? SITE_THEME.dark : SITE_THEME.light;
-          localStorage.setItem("theme", theme);
         }
+        localStorage.setItem("theme", theme);
 
         // Apply theme to document
         document.documentElement.setAttribute("data-theme", theme);
@@ -79,10 +82,13 @@ const { title, image, headings = [], showTOC = false } = Astro.props;
       document.addEventListener("astro:after-swap", () => {
         // Get stored theme from localStorage
         const storedTheme = localStorage.getItem("theme");
+        const validThemes = [SITE_THEME.light, SITE_THEME.dark];
+        const theme = storedTheme === "dracula" ? SITE_THEME.dark : storedTheme;
 
-        if (storedTheme) {
+        if (validThemes.includes(theme)) {
           // Apply the stored theme to ensure it persists during navigation
-          document.documentElement.setAttribute("data-theme", storedTheme);
+          document.documentElement.setAttribute("data-theme", theme);
+          localStorage.setItem("theme", theme);
         }
       });
     </script>
