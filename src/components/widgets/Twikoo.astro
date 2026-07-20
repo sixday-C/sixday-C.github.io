@@ -14,7 +14,8 @@ const envId = TWIKOO_CONFIG.envId;
     envId
       ? (
           <div
-            id="twikoo"
+            id="twikoo-comments"
+            data-twikoo-root
             data-env-id={envId}
             data-path={path}
             data-lang={TWIKOO_CONFIG.lang}
@@ -40,13 +41,17 @@ const envId = TWIKOO_CONFIG.envId;
       (() => {
         const loadTwikoo = () =>
           new Promise((resolve, reject) => {
-            if (window.twikoo) {
+            if (typeof window.twikoo?.init === "function") {
               resolve();
               return;
             }
 
             const existingScript = document.querySelector("[data-twikoo-cdn]");
             if (existingScript) {
+              if (existingScript.dataset.loaded === "true") {
+                reject(new Error("Twikoo loaded without exposing init()"));
+                return;
+              }
               existingScript.addEventListener("load", resolve, { once: true });
               existingScript.addEventListener("error", reject, { once: true });
               return;
@@ -54,27 +59,49 @@ const envId = TWIKOO_CONFIG.envId;
 
             const script = document.createElement("script");
             script.src =
-              "https://cdn.jsdelivr.net/npm/twikoo@1.7.14/dist/twikoo.all.min.js";
+              "https://cdn.jsdelivr.net/npm/twikoo@1.7.14/dist/twikoo.min.js";
             script.defer = true;
             script.dataset.twikooCdn = "true";
-            script.addEventListener("load", resolve, { once: true });
+            script.addEventListener(
+              "load",
+              () => {
+                script.dataset.loaded = "true";
+                typeof window.twikoo?.init === "function"
+                  ? resolve()
+                  : reject(new Error("Twikoo loaded without exposing init()"));
+              },
+              { once: true },
+            );
             script.addEventListener("error", reject, { once: true });
             document.head.appendChild(script);
           });
 
-        document.addEventListener("astro:page-load", async () => {
-          const el = document.getElementById("twikoo");
-          if (!el) return;
+        const initTwikoo = async () => {
+          const el = document.querySelector("[data-twikoo-root]");
+          if (!el || el.dataset.twikooState) return;
 
-          await loadTwikoo();
+          el.dataset.twikooState = "loading";
 
-          window.twikoo.init({
-            envId: el.dataset.envId,
-            el: "#twikoo",
-            path: el.dataset.path || window.location.pathname,
-            lang: el.dataset.lang || "zh-CN",
-          });
-        });
+          try {
+            await loadTwikoo();
+
+            await window.twikoo.init({
+              envId: el.dataset.envId,
+              el: "#twikoo-comments",
+              path: el.dataset.path || window.location.pathname,
+              lang: el.dataset.lang || "zh-CN",
+            });
+            el.dataset.twikooState = "ready";
+          } catch (error) {
+            console.error("Failed to initialize Twikoo", error);
+            el.dataset.twikooState = "error";
+            el.innerHTML =
+              '<p class="twikoo-error">评论区暂时加载失败，请稍后刷新页面重试。</p>';
+          }
+        };
+
+        document.addEventListener("astro:page-load", initTwikoo);
+        initTwikoo();
       })();
     </script>
   )
@@ -106,6 +133,13 @@ const envId = TWIKOO_CONFIG.envId;
   .twikoo-wrapper :global(.el-button--primary) {
     background-color: var(--fallback-p, oklch(var(--p)));
     border-color: var(--fallback-p, oklch(var(--p)));
+  }
+
+  .twikoo-wrapper :global(.twikoo-error) {
+    margin: 0;
+    padding: 1rem 0;
+    text-align: center;
+    color: var(--fallback-er, oklch(var(--er)));
   }
 
   @media (max-width: 768px) {
