@@ -7,7 +7,7 @@ import { type CollectionEntry, getCollection } from "astro:content";
 import dayjs from "dayjs";
 import { DATE_FORMAT } from "@config";
 import MainCard from "@/components/MainCard.astro";
-import Giscus from "@components/widgets/Giscus.astro";
+import Twikoo from "@components/widgets/Twikoo.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -70,6 +70,6 @@ const displayDate = blog.data.pubDate
     </div>
 
     <!-- 评论系统 -->
-    <Giscus term={`blog/${blog.slug}`} />
+    <Twikoo path={`/blog/${blog.slug}`} />
   </MainCard>
 </BaseLayout>

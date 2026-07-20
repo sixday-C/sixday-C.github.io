@@ -1,0 +1,95 @@
+---
+import { TWIKOO_CONFIG } from "@/config";
+
+interface Props {
+  path?: string;
+}
+
+const { path } = Astro.props;
+const envId = TWIKOO_CONFIG.envId;
+---
+
+<div class="twikoo-wrapper max-w-3xl mx-auto px-4 mt-8">
+  {
+    envId
+      ? (
+          <div
+            id="twikoo"
+            data-env-id={envId}
+            data-path={path}
+            data-lang={TWIKOO_CONFIG.lang}
+            class="rounded-xl bg-base-100 p-4 sm:p-6 border border-base-300 shadow-md"
+          />
+        )
+      : (
+          <div class="rounded-xl bg-base-100 p-4 sm:p-6 border border-base-300 shadow-md">
+            <p class="font-semibold mb-2">Twikoo 后端还没有配置</p>
+            <p class="text-sm opacity-70 leading-6">
+              部署 Twikoo 后端后，把完整地址填到 <code>src/config.ts</code>
+              的 <code>TWIKOO_CONFIG.envId</code>，例如
+              <code>https://sixdayc-twikoo.vercel.app</code>。
+            </p>
+          </div>
+        )
+  }
+</div>
+
+{
+  envId && (
+    <script src="https://cdn.jsdelivr.net/npm/twikoo@1.7.14/dist/twikoo.min.js"></script>
+  )
+}
+
+{
+  envId && (
+    <script is:inline>
+      document.addEventListener("astro:page-load", () => {
+        const el = document.getElementById("twikoo");
+        if (!el || !window.twikoo) return;
+
+        window.twikoo.init({
+          envId: el.dataset.envId,
+          el: "#twikoo",
+          path: el.dataset.path || window.location.pathname,
+          lang: el.dataset.lang || "zh-CN",
+        });
+      });
+    </script>
+  )
+}
+
+<style>
+  .twikoo-wrapper {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--fallback-bc, oklch(var(--bc) / 0.1));
+  }
+
+  [data-theme="dracula"] .twikoo-wrapper {
+    border-top-color: var(--fallback-bc, oklch(var(--bc) / 0.2));
+  }
+
+  .twikoo-wrapper :global(.tk-comments-container),
+  .twikoo-wrapper :global(.tk-submit) {
+    color: var(--fallback-bc, oklch(var(--bc)));
+  }
+
+  .twikoo-wrapper :global(.el-textarea__inner),
+  .twikoo-wrapper :global(.el-input__inner) {
+    background: var(--fallback-b1, oklch(var(--b1)));
+    color: var(--fallback-bc, oklch(var(--bc)));
+    border-color: var(--fallback-b3, oklch(var(--b3)));
+  }
+
+  .twikoo-wrapper :global(.el-button--primary) {
+    background-color: var(--fallback-p, oklch(var(--p)));
+    border-color: var(--fallback-p, oklch(var(--p)));
+  }
+
+  @media (max-width: 768px) {
+    .twikoo-wrapper {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+    }
+  }
+</style>

@@ -54,16 +54,8 @@ export function t(key: string): string {
   return typeof currentObj === "string" ? currentObj : key;
 }
 
-// Giscus 评论系统配置
-export const GISCUS_CONFIG = {
-  repo: "sixday-C/sixday-C.github.io",
-  repoId: "R_kgDOORlROQ",
-  category: "General",
-  categoryId: "DIC_kwDOORlROc4CxYtx",
-  mapping: "pathname",
-  reactionsEnabled: true,
-  emitMetadata: false,
-  inputPosition: "bottom",
-  theme: "preferred_color_scheme",
+// Twikoo 评论系统配置。Vercel 部署时 envId 填完整地址，例如 https://xxx.vercel.app
+export const TWIKOO_CONFIG = {
+  envId: "https://twikoo-pi-self.vercel.app",
   lang: "zh-CN",
 };
