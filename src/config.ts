@@ -56,7 +56,7 @@ export function t(key: string): string {
 
 // Giscus 评论系统配置
 export const GISCUS_CONFIG = {
-  repo: "Sixday-C/SixdayC",
+  repo: "sixday-C/sixday-C.github.io",
   repoId: "R_kgDOORlROQ",
   category: "General",
   categoryId: "DIC_kwDOORlROc4CxYtx",
