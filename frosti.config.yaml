@@ -61,7 +61,7 @@ site:
 # 用户的个人信息
 user:
   name: SixdayC # 用户名
-  site: "https://www.sixdayc.top/" # 用户的网站链接
+  site: "https://sixday-c.github.io/" # 用户的网站链接
   avatar: /profile.png # 用户头像路径
   sidebar: # 侧边栏配置
     social:
