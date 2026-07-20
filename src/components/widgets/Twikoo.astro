@@ -36,24 +36,46 @@ const envId = TWIKOO_CONFIG.envId;
 
 {
   envId && (
-    <script src="https://cdn.jsdelivr.net/npm/twikoo@1.7.14/dist/twikoo.min.js"></script>
-  )
-}
-
-{
-  envId && (
     <script is:inline>
-      document.addEventListener("astro:page-load", () => {
-        const el = document.getElementById("twikoo");
-        if (!el || !window.twikoo) return;
+      (() => {
+        const loadTwikoo = () =>
+          new Promise((resolve, reject) => {
+            if (window.twikoo) {
+              resolve();
+              return;
+            }
 
-        window.twikoo.init({
-          envId: el.dataset.envId,
-          el: "#twikoo",
-          path: el.dataset.path || window.location.pathname,
-          lang: el.dataset.lang || "zh-CN",
+            const existingScript = document.querySelector("[data-twikoo-cdn]");
+            if (existingScript) {
+              existingScript.addEventListener("load", resolve, { once: true });
+              existingScript.addEventListener("error", reject, { once: true });
+              return;
+            }
+
+            const script = document.createElement("script");
+            script.src =
+              "https://cdn.jsdelivr.net/npm/twikoo@1.7.14/dist/twikoo.all.min.js";
+            script.defer = true;
+            script.dataset.twikooCdn = "true";
+            script.addEventListener("load", resolve, { once: true });
+            script.addEventListener("error", reject, { once: true });
+            document.head.appendChild(script);
+          });
+
+        document.addEventListener("astro:page-load", async () => {
+          const el = document.getElementById("twikoo");
+          if (!el) return;
+
+          await loadTwikoo();
+
+          window.twikoo.init({
+            envId: el.dataset.envId,
+            el: "#twikoo",
+            path: el.dataset.path || window.location.pathname,
+            lang: el.dataset.lang || "zh-CN",
+          });
         });
-      });
+      })();
     </script>
   )
 }
